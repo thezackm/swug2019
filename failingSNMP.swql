@@ -1,0 +1,29 @@
+SELECT
+    -- You can remove this column if you do not have Additional Pollers
+    node.Engine.ServerName AS [POLLING ENGINE]
+    ,node.Caption AS [DEVICE]
+    ,node.DetailsURL AS [_LinkFor_DEVICE]
+    ,'/Orion/images/StatusIcons/Small-' +  node.StatusIcon AS [_IconFor_DEVICE]
+    ,node.ObjectSubType AS [POLLING METHOD]
+    -- If you don't want to show your SNMP Community String(s), remove this line
+    ,node.Community AS [COMMUNITY STRING]
+    ,ISNULL( TOSTRING( cpu.LASTCPU ), 'NEVER' ) AS [LAST SUCCESS]
+FROM Orion.Nodes AS [node]
+LEFT JOIN (
+    SELECT
+        NodeID
+        ,TOLOCAL( MAX( DateTime ) ) AS [LASTCPU]
+    FROM Orion.CPULoad
+    GROUP BY NodeID 
+) AS [cpu] ON cpu.NodeID = node.NodeID
+-- Limit to Nodes that are currently Up or Warning status
+WHERE node.Status IN ( 1, 3 )
+-- And are polled via SNMP
+AND node.ObjectSubType = 'SNMP'
+-- And have > 15 minutes since their latest successful CPU metrics 
+AND (
+    ( SECONDDIFF( cpu.LASTCPU, GETDATE() ) / node.PollInterval > 15 )
+    OR
+    ( SECONDDIFF( node.LastSystemUptimePollUTC, GETUTCDATE() ) / node.PollInterval > 15 )
+)
+ORDER BY [POLLING ENGINE], [DEVICE]
