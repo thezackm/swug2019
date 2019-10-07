@@ -1,0 +1,2 @@
+# Force SQL Syntax Highlighting on SWQL files
+*.swql linguist-language=SQL
