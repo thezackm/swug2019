@@ -1,0 +1,13 @@
+SELECT
+	node.Caption AS [ENGINE]
+	,node.DetailsURL AS [_LinkFor_ENGINE]
+	,'/Orion/images/StatusIcons/Small-' +  node.StatusIcon AS [_IconFor_ENGINE]
+	,TOLOCAL( eng.KeepAlive ) AS [KEEP ALIVE]
+	,SECONDDIFF( TOLOCAL ( eng.KeepAlive ), GETDATE() ) AS [SECONDS SINCE]
+	,CASE
+		WHEN SECONDDIFF( TOLOCAL ( eng.KeepAlive ), GETDATE() ) > 90 THEN '!!! PROBLEM !!!'
+		ELSE 'OK'
+	END AS [KEEP ALIVE STATUS]
+FROM Orion.Engines AS [eng]
+JOIN Orion.Nodes AS [node] ON eng.IP = node.IPAddress
+ORDER BY eng.ServerName
