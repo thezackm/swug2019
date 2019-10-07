@@ -1,0 +1,105 @@
+SELECT
+    AccountID AS [NAME]
+    ,CASE
+        WHEN AccountType = 0 THEN 'Orion Service Account'
+        WHEN AccountType = 1 THEN 'Local Orion'
+        WHEN AccountType = 2 THEN 'AD Individual'
+        WHEN AccountType = 3 THEN 'AD Group'
+        WHEN AccountType = 4 THEN 'Group Member'
+    END AS [ACCOUNT TYPE]
+    ,CASE
+        WHEN AccountType IN ('0','1') THEN '/Orion/Admin/Accounts/images/icons/orion_generic_icon_orange.gif'
+        ELSE '/Orion/Admin/Accounts/images/icons/windows.gif'
+    END AS [_IconFor_ACCOUNT TYPE]
+    ,CASE
+        WHEN Enabled = 'Y' THEN 'Yes'
+        ELSE 'No'
+    END AS [ENABLED]
+    ,CASE
+        WHEN Enabled = 'Y' THEN '/Orion/Admin/Accounts/images/icons/ok_enabled.png'
+        ELSE '/Orion/Admin/Accounts/images/icons/disable.png'
+    END AS [_IconFor_ENABLED]
+    ,Expires AS [EXPIRATION]
+    ,LastLogin AS [LAST LOGIN]
+    ,CASE
+        WHEN LimitationID1 IS NULL OR LimitationID1 = '0' THEN 'None'
+        ELSE 'Limitations Exist'
+    END AS [ACCOUNT LIMITAITON]
+    ,CASE
+        WHEN AllowAdmin = 'Y' THEN 'Yes'
+        ELSE 'No'
+    END AS [ADMIN RIGHTS]
+    ,CASE
+        WHEN AllowAdmin = 'Y' THEN '/Orion/Admin/Accounts/images/icons/ok_enabled.png'
+        ELSE '/Orion/Admin/Accounts/images/icons/disable.png'
+    END AS [_IconFor_ADMIN RIGHTS]
+    ,CASE
+        WHEN AllowNodeManagement = 'Y' THEN 'Yes'
+        ELSE 'No'
+    END AS [NODE MGMT]
+    ,CASE 
+        WHEN AllowNodeManagement = 'Y' THEN '/Orion/Admin/Accounts/images/icons/ok_enabled.png'
+        ELSE '/Orion/Admin/Accounts/images/icons/disable.png'
+    END AS [_IconFor_NODE MGMT]
+    ,CASE
+        WHEN AllowReportManagement = 'Y' THEN 'Yes'
+        ELSE 'No'
+    END AS [REPORT MGMT]
+    ,CASE 
+        WHEN AllowReportManagement = 'Y' THEN '/Orion/Admin/Accounts/images/icons/ok_enabled.png'
+        ELSE '/Orion/Admin/Accounts/images/icons/disable.png'
+    END AS [_IconFor_REPORT MGMT]
+    ,CASE
+        WHEN AllowAlertManagement = 'Y' THEN 'Yes'
+        ELSE 'No'
+    END AS [ALERT MGMT]
+    ,CASE 
+        WHEN AllowAlertManagement = 'Y' THEN '/Orion/Admin/Accounts/images/icons/ok_enabled.png'
+        ELSE '/Orion/Admin/Accounts/images/icons/disable.png'
+    END AS [_IconFor_ALERT MGMT]
+    ,CASE
+        WHEN AllowUnmanage = 'Y' THEN 'Yes'
+        ELSE 'No'
+    END AS [ALLOW UNMANAGE]
+    ,CASE 
+        WHEN AllowUnmanage = 'Y' THEN '/Orion/Admin/Accounts/images/icons/ok_enabled.png'
+        ELSE '/Orion/Admin/Accounts/images/icons/disable.png'
+    END AS [_IconFor_ALLOW UNMANAGE]
+    ,CASE
+        WHEN AllowDisableAction = 'Y' THEN 'Yes'
+        ELSE 'No'
+    END AS [ALLOW DISABLE ACTIONS]
+    ,CASE 
+        WHEN AllowDisableAction = 'Y' THEN '/Orion/Admin/Accounts/images/icons/ok_enabled.png'
+        ELSE '/Orion/Admin/Accounts/images/icons/disable.png'
+    END AS [_IconFor_ALLOW DISABLE ACTIONS]
+    ,CASE
+        WHEN AllowDisableAlert = 'Y' THEN 'Yes'
+        ELSE 'No'
+    END AS [ALLOW DISABLE ALERTS]
+    ,CASE 
+        WHEN AllowDisableAlert = 'Y' THEN '/Orion/Admin/Accounts/images/icons/ok_enabled.png'
+        ELSE '/Orion/Admin/Accounts/images/icons/disable.png'
+    END AS [_IconFor_ALLOW DISABLE ALERTS]
+    ,CASE
+        WHEN AllowDisableAllActions = 'Y' THEN 'Yes'
+        ELSE 'No'
+    END AS [ALLOW DISABLE ALL ACTIONS]
+    ,CASE 
+        WHEN AllowDisableAllActions = 'Y' THEN '/Orion/Admin/Accounts/images/icons/ok_enabled.png'
+        ELSE '/Orion/Admin/Accounts/images/icons/disable.png'
+    END AS [_IconFor_ALLOW DISABLE ALL ACTIONS]
+    ,CASE
+        WHEN AllowCustomize = 'Y' THEN 'Yes'
+        ELSE 'No'
+    END AS [VIEW CUSTOMIZATIONS]
+    ,CASE 
+        WHEN AllowCustomize = 'Y' THEN '/Orion/Admin/Accounts/images/icons/ok_enabled.png'
+        ELSE '/Orion/Admin/Accounts/images/icons/disable.png'
+    END AS [_IconFor_VIEW CUSTOMIZATIONS]
+FROM Orion.Accounts
+-- Limit to only Local and AD Accounts
+WHERE AccountType IN ('1','2','3')
+-- This is the line that enables the Search Option in a Custom Query Resource
+-- AND AccountID LIKE '%${SEARCH_STRING}%'
+ORDER BY AccountType, AccountID
