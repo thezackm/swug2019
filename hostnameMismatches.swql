@@ -28,6 +28,7 @@ FROM
     -- Limit to nodes that are not External or UnManaged
     WHERE node.Status NOT IN ( 9, 11 )
 ) AS [tbl]
--- Limit to only nodes where 
+-- Limit to only nodes where the hostname doesn't match the SysName or DNS
 WHERE ( tbl.[DEVICE] <> tbl.[DNS SHORTNAME] OR tbl.[DEVICE] <> tbl.[SYSNAME] )
+-- This is the line that enable the Search Option in a Custom Query Resource
 --AND tbl.[DEVICE] LIKE '%${SEARCH_STRING}%'
