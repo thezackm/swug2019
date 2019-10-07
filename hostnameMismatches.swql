@@ -1,0 +1,33 @@
+SELECT 
+    tbl.[DEVICE]
+    ,tbl.[_LinkFor_DEVICE]
+    ,tbl.[_IconFor_DEVICE]
+    ,tbl.[IP ADDRESS]
+    ,tbl.[DNS SHORTNAME]
+    ,tbl.[SYSNAME]
+FROM 
+(
+    SELECT
+        TOUPPER( node.Caption ) AS [DEVICE]
+        ,node.DetailsURL AS [_LinkFor_DEVICE]
+        ,'/Orion/images/StatusIcons/Small-' +  node.StatusIcon AS [_IconFor_DEVICE]
+        ,node.IPAddress AS [IP ADDRESS]
+        -- Generate a short name from DNS by querying a substring up to the first period '.'
+        ,CASE 
+            WHEN CHARINDEX( '.', node.DNS ) > 0 THEN TOUPPER( SUBSTRING( node.DNS, 0, CHARINDEX( '.', node.DNS ) ) )
+            WHEN CHARINDEX( '.', node.DNS ) = 0 THEN TOUPPER( node.DNS )
+            WHEN CHARINDEX( '.', node.DNS ) IS NULL THEN ''
+        END AS [DNS SHORTNAME]
+        -- Generate a short name from SysName by querying a substring up to the first period '.'
+        ,CASE 
+            WHEN CHARINDEX( '.', node.SysName ) > 0 THEN TOUPPER( SUBSTRING( node.SysName, 0, CHARINDEX( '.', node.SysName ) ) )
+            WHEN CHARINDEX( '.', node.SysName ) = 0 THEN TOUPPER( node.SysName )
+            WHEN CHARINDEX( '.', node.SysName ) IS NULL THEN ''
+        END AS [SYSNAME]
+    FROM Orion.Nodes AS [node]
+    -- Limit to nodes that are not External or UnManaged
+    WHERE node.Status NOT IN ( 9, 11 )
+) AS [tbl]
+-- Limit to only nodes where 
+WHERE ( tbl.[DEVICE] <> tbl.[DNS SHORTNAME] OR tbl.[DEVICE] <> tbl.[SYSNAME] )
+--AND tbl.[DEVICE] LIKE '%${SEARCH_STRING}%'
