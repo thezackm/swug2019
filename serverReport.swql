@@ -1,0 +1,64 @@
+SELECT 
+-- Group Details 
+    grp.Name AS [GROUP]
+    ,grp.DetailsURL AS [_LinkFor_GROUP]
+    ,'/Orion/images/StatusIcons/Small-' + status.StatusName + '.gif' AS [_IconFor_GROUP]
+
+-- Node Details 
+    ,node.Caption AS [SERVER]
+    ,node.DetailsURL AS [_LinkFor_SERVER]
+    ,'/Orion/images/StatusIcons/Small-' + node.StatusIcon AS [_IconFor_SERVER]
+
+-- Interface Details 
+    ,node.Interfaces.InterfaceName AS [INTERFACE]
+    ,AVG( node.Interfaces.Traffic.PercentUtil ) AS [INTERFACE AVG]
+    ,ROUND( AVG( node.Interfaces.Traffic.PercentUtil ),2 ) AS [INTERFACE ROUNDED]
+    ,FLOOR( AVG( node.Interfaces.Traffic.PercentUtil ) ) AS [INTERFACE FLOOR]
+    ,CEILING( AVG( node.Interfaces.Traffic.PercentUtil ) ) AS [INTERFACE CEILING]
+    ,TOSTRING( CEILING( AVG( node.Interfaces.Traffic.PercentUtil ) ) ) + '%' AS [INTERFACE STRING]
+    ,node.Interfaces.DetailsURL AS [_LinkFor_INTERFACE]
+    ,'/Orion/images/StatusIcons/Small-' + node.Interfaces.StatusIcon AS [_IconFor_INTERFACE]
+
+-- Volume Details 
+    ,node.Volumes.Caption AS [OS DRIVE]
+    ,AVG( node.Volumes.VolumeUsageHistory.PercentDiskUsed ) AS [OS DRIVE AVG]
+    ,ROUND( AVG( node.Volumes.VolumeUsageHistory.PercentDiskUsed ),2 ) AS [OS DRIVE ROUNDED]
+    ,FLOOR( AVG( node.Volumes.VolumeUsageHistory.PercentDiskUsed ) ) AS [OS DRIVE FLOOR]
+    ,CEILING( AVG( node.Volumes.VolumeUsageHistory.PercentDiskUsed ) ) AS [OS DRIVE CEILING]
+    ,TOSTRING( CEILING( AVG( node.Volumes.VolumeUsageHistory.PercentDiskUsed ) )  ) + '%'AS [OS DRIVE STRING]
+    ,node.Volumes.DetailsURL AS [_LinkFor_OS DRIVE]
+    ,'/Orion/images/StatusIcons/Small-' +  node.Volumes.StatusIcon AS [_IconFor_OS DRIVE]
+
+-- Root Entity is Orion.Nodes 
+FROM Orion.Nodes AS [node]
+
+-- Group Objects commonly need to be joined 
+JOIN Orion.Groups AS [grp] ON grp.Name = node.CustomProperties.City
+
+-- And then have the StatusInfo entity joined as well 
+JOIN Orion.StatusInfo AS [status] ON status.StatusID = grp.Status
+
+-- Limit Results to "Fixed Disk" Volumes
+WHERE node.Volumes.VolumeTypeID = 4 
+
+-- Matching the C drive name
+AND node.Volumes.Caption LIKE 'C:\%' 
+
+-- For Nodes In These 2 Cities
+AND node.CustomProperties.City IN ('Pollsylvania','Cloud City') 
+
+-- And Only In The Last 6 Hours
+AND node.Interfaces.Traffic.DateTime > ADDHOUR(-6, GETUTCDATE()) 
+
+-- When you use aggregates (like MIN/MAX/AVG), you have to group your results by the non-aggregate column
+GROUP BY 
+    grp.Name
+    ,grp.DetailsURL
+    ,status.StatusName
+    ,node.Caption
+    ,node.DetailsURL
+    ,node.StatusIcon
+    ,node.Interfaces.DetailsURL
+    ,node.Interfaces.StatusIcon
+    ,node.Volumes.DetailsURL
+    ,node.Volumes.StatusIcon
