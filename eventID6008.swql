@@ -1,0 +1,12 @@
+SELECT 
+	win.TimeGeneratedUTC AS [UTC TIME STAMP]
+	-- Trim out the unnecessary text
+	,REPLACE( REPLACE( win.Message, 'The previous system shutdown at ', '' ), ' was unexpected.', '' ) AS [SHUTDOWN TIME]
+	,win.ComputerName AS [SOURCE MACHINE]
+	,win.EventCode AS [EVENT ID]
+	-- Show the full message if you want
+	,win.Message AS [EVENT MESSAGE]
+FROM Orion.APM.WindowsEvent AS [win]
+-- Filter to only EventID 6008 (unexpected shutdowns)
+WHERE win.EventCode = 6008
+ORDER BY [UTC TIME STAMP]
