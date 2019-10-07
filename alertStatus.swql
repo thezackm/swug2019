@@ -1,0 +1,69 @@
+-- NOTE: Additional queries can be added to show more alerts by Object Type
+-- A quick way to identify what you have in scope right now is to run the following:
+-- SELECT DISTINCT ObjectType FROM Orion.AlertDefinitions WHERE Enabled = 1 ORDER BY ObjectType
+
+-- Node Alerts
+SELECT 
+    node.Caption AS [ALERT OBJECT]
+    ,node.DetailsURL AS [_LinkFor_ALERT OBJECT]
+    ,TOLOCAL( stat.TriggerTimeStamp ) AS [ALERT TIME]
+    ,def.Name AS [ALERT NAME]
+    ,ISNULL( stat.AcknowledgedBy, '' ) AS [ACKNOWLEDGED BY]
+    ,ISNULL( stat.Notes, '' ) AS [ALERT NOTES]
+FROM Orion.AlertStatus AS [stat]
+JOIN Orion.AlertDefinitions AS [def] ON def.AlertDefID = stat.AlertDefID
+JOIN Orion.Nodes AS [node] ON node.NodeID = stat.ActiveObject
+WHERE stat.ObjectType = 'Node'
+
+UNION ALL
+
+--Interface Alerts
+(
+SELECT 
+    int.FullName AS [ALERT OBJECT]
+    ,int.DetailsURL AS [_LinkFor_ALERT OBJECT]
+    ,TOLOCAL( stat.TriggerTimeStamp ) AS [ALERT TIME]
+    ,def.Name AS [ALERT NAME]
+    ,ISNULL( stat.AcknowledgedBy, '' ) AS [ACKNOWLEDGED BY]
+    ,ISNULL( stat.Notes, '' ) AS [ALERT NOTES]
+FROM Orion.AlertStatus AS [stat]
+JOIN Orion.AlertDefinitions AS [def] ON def.AlertDefID = stat.AlertDefID
+JOIN Orion.NPM.Interfaces AS [int] ON int.InterfaceID = stat.ActiveObject
+WHERE stat.ObjectType = 'Interface'
+)
+
+UNION ALL 
+
+-- Volume Alerts
+(
+SELECT 
+    vol.FullName AS [ALERT OBJECT]
+    ,vol.DetailsURL AS [_LinkFor_ALERT OBJECT]
+    ,TOLOCAL( stat.TriggerTimeStamp ) AS [ALERT TIME]
+    ,def.Name AS [ALERT NAME]
+    ,ISNULL( stat.AcknowledgedBy, '' ) AS [ACKNOWLEDGED BY]
+    ,ISNULL( stat.Notes, '' ) AS [ALERT NOTES]
+FROM Orion.AlertStatus AS [stat]
+JOIN Orion.AlertDefinitions AS [def] ON def.AlertDefID = stat.AlertDefID
+JOIN Orion.Volumes AS [vol] ON vol.VolumeID = stat.ActiveObject
+WHERE stat.ObjectType = 'Volume'
+)
+
+UNION ALL 
+
+-- Component Monitor Alerts
+(
+SELECT 
+    comp.FullyQualifiedName AS [ALERT OBJECT]
+    ,comp.DetailsURL AS [_LinkFor_ALERT OBJECT]
+    ,TOLOCAL( stat.TriggerTimeStamp ) AS [ALERT TIME]
+    ,def.Name AS [ALERT NAME]
+    ,ISNULL( stat.AcknowledgedBy, '' ) AS [ACKNOWLEDGED BY]
+    ,ISNULL( stat.Notes, '' ) AS [ALERT NOTES]
+FROM Orion.AlertStatus AS [stat]
+JOIN Orion.AlertDefinitions AS [def] ON def.AlertDefID = stat.AlertDefID
+JOIN Orion.APM.Component AS [comp] ON comp.ComponentID = stat.ActiveObject
+WHERE stat.ObjectType = 'APM: Component'
+-- Also grab any of the AppInsight Components with active alerts
+OR stat.ObjectType LIKE 'AppInsight for %'
+)
