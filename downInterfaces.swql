@@ -1,0 +1,15 @@
+SELECT
+    node.Caption AS [DEVICE]
+    ,node.DetailsURL AS [_LinkFor_DEVICE]
+    ,'/Orion/images/StatusIcons/Small-' + node.StatusIcon AS [_IconFor_DEVICE]
+    ,node.IPAddress AS [IP ADDRESS]
+    ,node.Interfaces.Caption AS [INTERFACE]
+    ,node.Interfaces.DetailsURL AS [_LinkFor_INTERFACE]
+    ,'/Orion/images/StatusIcons/Small-' +  node.Interfaces.StatusIcon AS [_IconFor_INTERFACE]
+    ,TOLOCAL( node.Interfaces.LastChange ) AS [LAST STATUS CHANGE]
+FROM Orion.Nodes AS [node]
+-- Limit to only down interfaces
+WHERE node.Interfaces.Status = 2
+-- This line is used in the 'Search Query' for a Custom Query Resource to enable searching by Interface Caption
+--AND ( node.Caption LIKE '%${SEARCH_STRING}%' OR node.Interfaces.Caption LIKE '%${SEARCH_STRING}%' )
+ORDER BY [DEVICE], [INTERFACE]
