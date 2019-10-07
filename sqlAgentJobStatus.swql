@@ -1,0 +1,32 @@
+-- Requires AppInsight for SQL assigned to Node(s)
+SELECT 
+	s.SqlApplication.DisplayName AS [APP MONITOR]
+	,s.SqlApplication.DetailsUrl AS [_LinkFor_APP MONITOR]
+	,'/Orion/images/StatusIcons/small-' + i.IconPostfix + '.gif' AS [_IconFor_APP MONITOR]
+	,s.Name AS [JOB NAME]
+	,s.DetailsUrl AS [_LinkFor_JOB NAME]
+	,CASE 
+		WHEN s.LastRunStatus = 0 THEN 'FAILED'
+		WHEN s.LastRunStatus = 1 THEN 'SUCCEEDED'
+		WHEN s.LastRunStatus = 2 THEN 'RETRY'
+		WHEN s.LastRunStatus = 3 THEN 'CANCELLED'
+		WHEN s.LastRunStatus = 4 THEN 'IN PROGRESS'
+	END AS [JOB STATUS]
+	,CASE 
+		WHEN s.LastRunStatus = 0 THEN '/Orion/images/StatusIcons/small-down.gif'
+		WHEN s.LastRunStatus = 1 THEN '/Orion/images/StatusIcons/small-up.gif'
+		WHEN s.LastRunStatus = 2 THEN '/Orion/images/StatusIcons/small-warning.gif'
+		WHEN s.LastRunStatus = 3 THEN '/Orion/images/StatusIcons/small-notrunning.gif'
+		WHEN s.LastRunStatus = 4 THEN '/Orion/images/StatusIcons/small-testing.gif'
+	END AS [_IconFor_JOB STATUS]
+	,TOLOCAL( s.LastRunDate ) AS [LAST RUN]
+	,CASE 
+		WHEN s.LastRunDuration <= 60 THEN ( TOSTRING( s.LastRunDuration ) + ' seconds' )
+		WHEN s.LastRunDuration >= 60 THEN ( TOSTRING(  s.LastRunDuration / 60 ) + ' minutes' )
+	END AS [LAST DURATION]
+FROM Orion.APM.SqlJobInfo s 
+JOIN Orion.StatusInfo i ON i.StatusId = s.SqlApplication.Status 
+
+-- Enter your target Application ID Here
+WHERE s.SqlApplication.ApplicationID = ''
+ORDER BY s.Name
