@@ -1,0 +1,14 @@
+SELECT
+	node.Caption AS [DEVICE]
+	,node.DetailsURL AS [_LinkFor_DEVICE]
+	,'/Orion/images/StatusIcons/Small-' + node.StatusIcon AS [_IconFor_DEVICE]
+	,node.AssetInventory.OSUpdates.Name AS [PATCH NAME]
+	,node.AssetInventory.OSUpdates.Type AS [PATCH TYPE]
+	,node.AssetInventory.OSUpdates.InstallDate AS [INSTALL DATE]
+	,node.AssetInventory.OSUpdates.InstalledBy AS [INSTALLED BY]
+FROM Orion.Nodes AS [node]
+-- Filter to only nodes that actually have patches found
+WHERE node.AssetInventory.OSUpdates.Name IS NOT NULL 
+-- This is the line that enables the Search Option in a Custom Query Resource
+--AND ( node.Caption LIKE '%${SEARCH_STRING}%' OR node.AssetInventory.OSUpdates.Name LIKE '%${SEARCH_STRING}%' )
+ORDER BY [DEVICE], [PATCH NAME]
