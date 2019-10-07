@@ -1,0 +1,41 @@
+SELECT
+    node.Caption AS [DEVICE]
+    ,node.DetailsURL AS [_LinkFor_DEVICE]
+    ,'/Orion/images/StatusIcons/Small-' +  node.StatusIcon AS [_IconFor_DEVICE]
+    ,node.Interfaces.Caption AS [INTERFACE]
+    ,node.Interfaces.DetailsURL AS [_LinkFor_INTERFACE]
+    ,'/Orion/images/StatusIcons/Small-' +  node.Interfaces.StatusIcon AS [_IconFor_INTERFACE]
+    ,node.Interfaces.InBandwidth/1000000 AS [RCV BW Mbps]
+    ,TOSTRING( CEILING( AVG( node.Interfaces.Traffic.InPercentUtil ) ) ) + '%' AS [AVG RCV %]
+    -- Add a visual indicator for Utilization Health
+    ,CASE 
+        WHEN CEILING( AVG( node.Interfaces.Traffic.InPercentUtil ) ) < 80 THEN '/Orion/images/StatusIcons/Small-Up.gif'
+        WHEN CEILING( AVG( node.Interfaces.Traffic.InPercentUtil ) ) >= 80 AND CEILING( AVG( node.Interfaces.Traffic.InPercentUtil ) ) < 90 THEN '/Orion/images/StatusIcons/Small-Warning.gif'
+        WHEN CEILING( AVG( node.Interfaces.Traffic.InPercentUtil ) ) >= 90 THEN '/Orion/images/StatusIcons/Small-Down.gif'
+    END AS [_IconFor_AVG RCV %]
+    ,node.Interfaces.OutBandwidth/1000000 AS [XMT BW Mbps]
+    ,TOSTRING( CEILING( AVG( node.Interfaces.Traffic.OutPercentUtil ) ) ) + '%' AS [AVG XMT %]
+    -- Add a visual indicator for Utilization Health
+    ,CASE 
+        WHEN CEILING( AVG( node.Interfaces.Traffic.OutPercentUtil ) ) < 80 THEN '/Orion/images/StatusIcons/Small-Up.gif'
+        WHEN CEILING( AVG( node.Interfaces.Traffic.OutPercentUtil ) ) >= 80 AND CEILING( AVG( node.Interfaces.Traffic.OutPercentUtil ) ) < 90 THEN '/Orion/images/StatusIcons/Small-Warning.gif'
+        WHEN CEILING( AVG( node.Interfaces.Traffic.OutPercentUtil ) ) >= 90 THEN '/Orion/images/StatusIcons/Small-Down.gif'
+    END AS [_IconFor_AVG XMT %]
+FROM Orion.Nodes AS [node]
+-- Limit to last 7 days
+WHERE node.Interfaces.Traffic.DateTime > ( GETUTCDATE() -7 )
+-- And based on an Interface Custom Property
+AND node.Interfaces.CustomProperties.wan_reporting = 1
+-- And static business hours (this could use an integer custom property as well)
+AND HOUR( TOLOCAL( node.Interfaces.Traffic.DateTime ) ) >= 8
+AND HOUR( TOLOCAL( node.Interfaces.Traffic.DateTime ) ) <= 17
+
+-- This line is used in the 'Search Query' for a Custom Query Resource to enable searching by Interface Caption
+-- AND node.Interfaces.Caption LIKE '%${SEARCH_STRING}%'
+
+GROUP BY node.Caption, node.DetailsURL, node.StatusIcon, node.Interfaces.Caption, node.Interfaces.DetailsURL, node.Interfaces.StatusIcon, node.Interfaces.InBandwidth, node.Interfaces.OutBandwidth
+-- OPTIONAL: Limit to only interfaces with RCV or XMT > 50%
+-- HAVING CEILING( AVG( node.Interfaces.Traffic.InPercentUtil ) ) > 50
+-- OR CEILING( AVG( node.Interfaces.Traffic.OutPercentUtil ) ) > 50
+
+ORDER BY [DEVICE], [INTERFACE]
