@@ -1,0 +1,22 @@
+SELECT 
+    node.Caption AS [DEVICE]
+    ,node.DetailsURL AS [_LinkFor_DEVICE]
+    ,'/Orion/images/StatusIcons/Small-' +  node.StatusIcon AS [_IconFor_DEVICE]
+    -- Round the average to 3 decimal precision
+    ,ROUND( AVG( node.ResponseTimeHistory.Availability ), 3 ) AS [AVG AVAILABILITY]
+FROM Orion.Nodes AS [node]
+-- Limit results to the last 7 days
+WHERE node.ResponseTimeHistory.DateTime > ( GETUTCDATE() -7 )
+-- And only nodes that are not UnManaged currently
+AND node.UnManaged != 1
+-- NOTE: TIMES NEED TO BE REFERENCED TO UTC, OR CONVERTED TO LOCAL
+-- You can use a static hour option here (24 hour clock)
+AND HOUR( TOLOCAL( node.ResponseTimeHistory.DateTime ) ) >= 8
+AND HOUR( TOLOCAL( node.ResponseTimeHistory.DateTime ) ) <= 17
+-- Or you could use an integer custom property if you have nodes in various time zones
+-- AND HOUR( TOLOCAL( node.ResponseTimeHistory.DateTime ) ) >= node.CustomProperties.StartHour
+-- AND HOUR( TOLOCAL( node.ResponseTimeHistory.DateTime ) ) <= node.CustomProperties.EndHour
+GROUP BY node.Caption, node.DetailsURL, node.StatusIcon
+-- Limit results to nodes with less than 100% average availability for the week 
+HAVING AVG( node.ResponseTimeHistory.Availability ) < 100
+ORDER BY [AVG AVAILABILITY], [DEVICE]
