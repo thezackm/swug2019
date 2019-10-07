@@ -1,0 +1,32 @@
+SELECT
+    verb.EntityName AS [ENTITY NAME]
+    ,verb.VerbName AS [VERB NAME]
+    ,verb.Position AS [ARG POSITION]
+    ,verb.Name AS [ARG NAME]
+    ,CASE 
+        WHEN verb.Type = 'System.Boolean' THEN 'BOOLEAN'
+        WHEN verb.Type = 'System.Byte[]' THEN 'BYTE[]'
+        WHEN verb.Type = 'System.DateTime' THEN 'DATETIME'
+        WHEN verb.Type = 'System.Guid' THEN 'GUID'
+        WHEN verb.Type = 'System.Int16' THEN 'INT-16'
+        WHEN verb.Type = 'System.Int32' THEN 'INT-32'
+        WHEN verb.Type = 'System.Int32[]' THEN 'INT-32[]'
+        WHEN verb.Type = 'System.Int64' THEN 'INT-64'
+        WHEN verb.Type = 'System.Single' THEN 'SINGLE'
+        WHEN verb.Type = 'System.String' THEN 'STRING'
+        WHEN verb.Type = 'System.String[]' THEN 'STRING[]'
+        WHEN verb.Type = 'System.TimeSpan' THEN 'TIMESPAN'
+        WHEN verb.Type LIKE 'System.Collections.Generic.Dictionary%System.Int64%' THEN 'INT-64'
+        WHEN verb.Type LIKE 'System.Collections.Generic.Dictionary%System.Int32%' THEN 'INT-32'
+        WHEN verb.Type LIKE 'System.Collections.Generic.Dictionary%System.String%' THEN 'STRING'
+        WHEN verb.Type LIKE 'System.Nullable%System.DateTime%' THEN 'DATETIME'
+        WHEN verb.Type LIKE 'System.Nullable%System.Int32%' THEN 'INT-32'
+        WHEN verb.Type LIKE 'System.Nullable%System.TimeSpan%' THEN 'TIMESPAN'
+        ELSE 'CUSTOM TYPE'
+    END AS [ARG TYPE] 
+    ,verb.IsOptional AS [ARG OPTIONAL]
+FROM Metadata.VerbArgument AS [verb]
+-- These are the lines that enable the Search Option in a Custom Query Resource
+--WHERE verb.EntityName LIKE '%${SEARCH_STRING}%'
+--OR verb.VerbName LIKE '%${SEARCH_STRING}%'
+ORDER BY [ENTITY NAME], [VERB NAME], [ARG POSITION]
